@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  teamcity:
+    image: teamcity-server:latest
+    build: ./server
+    stop_signal: SIGINT
+    environment:
+        - TEAMCITY_SERVER_MEM_OPTS="-Xmx750m"
+        - TEAMCITY_LOGS /data/teamcity_server/logs
+    ports:
+      - 8111:8111
+    volumes: 
+      - ./server/data:/data
+    networks: 
+      network:
+        aliases: 
+          - tc.network
+
+  agent:
+    image: teamcity-agent:latest
+    build: ./agent
+    stop_signal: SIGINT
+    environment:
+        - SERVER_URL=http://tc.network:8111
+        - AGENT_NAME=default_agent
+    volumes: 
+      - ./agent/data:/data
+    networks: 
+      network:
+        aliases: 
+          - tc_agent.network
+
+networks:
+  network:
+    
